@@ -185,5 +185,8 @@ export function parseChessComGame(game, username) {
     timestamp: game.end_time || 0,
     moves: extractMoveCountFromPgn(game.pgn),
     url: game.url,
+    pgn: game.pgn || "",
+    whitePlayer: game.white?.username || "White",
+    blackPlayer: game.black?.username || "Black",
   };
 }

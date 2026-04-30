@@ -94,6 +94,7 @@ export default function Games({
   loadedArchivesCount,
   totalArchivesCount,
   hasMoreGames,
+  onReviewGame,
 }) {
   const [search, setSearch] = useState("");
   const [timeControl, setTimeControl] = useState("All");
@@ -276,6 +277,11 @@ export default function Games({
                             onClick={(event) => {
                               event.stopPropagation();
                               setSelectedGameId(game.id);
+                              onReviewGame?.({
+                                id: game.id,
+                                pgn: game.pgn,
+                                players: { white: game.whitePlayer, black: game.blackPlayer },
+                              });
                             }}
                             className="rounded-lg bg-purple-500/10 px-3 py-2 text-xs font-semibold text-purple-300 transition duration-200 hover:bg-purple-500 hover:text-white"
                           >
@@ -350,8 +356,15 @@ export default function Games({
                     <button
                       type="button"
                       className="rounded-xl bg-purple-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-950/30 transition duration-200 hover:bg-purple-400"
+                      onClick={() =>
+                        onReviewGame?.({
+                          id: selectedGame.id,
+                          pgn: selectedGame.pgn,
+                          players: { white: selectedGame.whitePlayer, black: selectedGame.blackPlayer },
+                        })
+                      }
                     >
-                      Review placeholder
+                      Review
                     </button>
                   </div>
                 </>

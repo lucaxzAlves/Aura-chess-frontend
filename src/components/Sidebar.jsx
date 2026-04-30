@@ -1,3 +1,5 @@
+import { useAuth } from "../contexts/AuthContext";
+
 const navigationItems = [
   {
     label: "Home",
@@ -76,19 +78,38 @@ function Icon({ children }) {
   );
 }
 
+function getUserName(user) {
+  if (!user || typeof user !== "object") return "Usuário";
+  return user.name || user.username || "Usuário";
+}
+
+function getUserEmail(user) {
+  if (!user || typeof user !== "object") return "";
+  return user.email || "";
+}
+
 export default function Sidebar({ activeItem, onActiveItemChange }) {
+  const { user, isAuthenticated, logout } = useAuth();
+
+  const handleGoToLogin = () => {
+    window.history.pushState({}, "", "/login");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    window.history.pushState({}, "", "/login");
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  };
+
+  const userName = getUserName(user);
+  const userEmail = getUserEmail(user);
+  const userInitial = String(userName).charAt(0).toUpperCase() || "U";
+
   return (
     <aside className="flex h-screen w-72 shrink-0 flex-col border-r border-white/10 bg-[#080a0e] px-4 py-5 text-slate-300 shadow-2xl shadow-black/30">
       <div className="mb-8 flex items-center gap-3 px-2">
-        <div className="grid h-10 w-10 place-items-center rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-400 shadow-lg shadow-purple-950/40">
-          <Icon>
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M8 21h8M9 17h6l1-8h-2.5L12 4 10.5 9H8l1 8Z"
-            />
-          </Icon>
-        </div>
+        <img src="/logo.svg" alt="Aura Chess logo" className="h-10 w-10" />
 
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.24em] text-white">
@@ -141,30 +162,36 @@ export default function Sidebar({ activeItem, onActiveItemChange }) {
         })}
       </nav>
 
-      <button
-        type="button"
-        className="group mt-6 flex w-full items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] p-3 text-left transition-all duration-200 hover:border-purple-500/40 hover:bg-purple-500/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#080a0e]"
-      >
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-purple-300 to-fuchsia-400 text-sm font-bold text-slate-950">
-          N
-        </div>
+      {isAuthenticated ? (
+        <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] p-3">
+          <div className="flex items-center gap-3">
+            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-gradient-to-br from-purple-300 to-fuchsia-400 text-sm font-bold text-slate-950">
+              {userInitial}
+            </div>
 
-        <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-white">Neo Gambit</p>
-          <p className="text-xs text-slate-500">Online</p>
-        </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-white">{userName}</p>
+              <p className="truncate text-xs text-slate-500">{userEmail || "Online"}</p>
+            </div>
+          </div>
 
-        <svg
-          aria-hidden="true"
-          className="h-4 w-4 shrink-0 text-slate-500 transition-colors duration-200 group-hover:text-slate-300"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth="2"
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mt-3 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-purple-400/60 hover:text-white"
+          >
+            Logout
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={handleGoToLogin}
+          className="group mt-6 flex w-full items-center justify-center rounded-xl border border-purple-500/40 bg-purple-500/15 p-3 text-sm font-semibold text-purple-200 transition-all duration-200 hover:border-purple-400 hover:bg-purple-500/30 hover:text-white"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="m6 9 6 6 6-6" />
-        </svg>
-      </button>
+          Login
+        </button>
+      )}
     </aside>
   );
 }
